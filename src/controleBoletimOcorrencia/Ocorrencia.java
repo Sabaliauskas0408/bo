@@ -2,7 +2,7 @@ package controleBoletimOcorrencia;
 
 import java.util.ArrayList;
 
-public abstract class Ocorrencia {
+public abstract class Ocorrencia implements Exportavel{
 	
 	private int numero;
 	private String data;
@@ -38,6 +38,8 @@ public abstract class Ocorrencia {
 	    this.historico.adicionarRegistro("Ocorrência cadastrada");
 	
 	}
+	
+	public abstract String gerarResumo();
 	
 	public void adicionarVitima(Pessoa vitima) {
 		vitimas.add(vitima);
@@ -76,6 +78,14 @@ public abstract class Ocorrencia {
         return status;
         
     }
+    
+    public String getData() {
+        return data;
+    }
+    
+    public String getCategoria() {
+        return getClass().getSimpleName();
+    }
 
     public String getDescricao() {
     	
@@ -87,6 +97,64 @@ public abstract class Ocorrencia {
         historico.mostrarRegistros();
         
     }
+    
+    public String mostrarPessoas(ArrayList<Pessoa> lista) {
+
+        String informacao = "";
+
+        if (lista.isEmpty()) {
+            return "Nenhuma cadastrada\n";
+        }
+
+        for (Pessoa pessoa : lista) {
+            informacao += "Nome: " + pessoa.getNome()
+                      + "\nContato: " + pessoa.getContato()
+                      + "\n";
+        }
+
+        return informacao;
+    }
+    
+    public void mudarDescricao(String novaDescricao) {
+
+        String descricaoAnterior = this.descricao;
+
+        this.descricao = novaDescricao;
+
+        historico.adicionarRegistro(
+            "Descrição alterada de: " + descricaoAnterior
+            + " para: " + novaDescricao
+        );
+    }
+    
+    @Override
+    public String gerarRelatorio() {
+
+        String relatorio = "------- BO Nº " + numero + " -------\n";
+
+        relatorio += "Data: " + data + "\n";
+        relatorio += "Hora: " + hora + "\n";
+        relatorio += "Local: " + local + "\n";
+        relatorio += "Descrição: " + descricao + "\n";
+        relatorio += "Status: " + status + "\n";
+        relatorio += "Possui arma: " + (possuiArma ? "Sim" : "Não") + "\n";
+
+        if (possuiArma) {
+            relatorio += "Tipo de arma: " + tipoArma + "\n";
+        }
+
+        relatorio += "\n--- VÍTIMAS ---\n";
+        relatorio += mostrarPessoas(vitimas);
+        relatorio += "\n--- TESTEMUNHAS ---\n";
+        relatorio += mostrarPessoas(testemunhas);
+        relatorio += "\n--- SUSPEITOS ---\n";
+        relatorio += mostrarPessoas(suspeitos);
+        
+        relatorio += gerarResumo();
+
+        return relatorio;
+    }
+    
 	
 }
 
